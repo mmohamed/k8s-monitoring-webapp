@@ -76,11 +76,11 @@ export default function SignIn(props) {
             localStorage.setItem('userInfo', JSON.stringify(res.data));
             props.history.push('/');
         }else {
-           setError(res.response.data.message);
+           setError(res.data.message);
+           setLoading(false);
         }
     }).catch(error => {
       setError(error.response.data.message);
-    }).finally(() => {
       setLoading(false);
     });
   }

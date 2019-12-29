@@ -21,10 +21,12 @@ import { Redirect } from 'react-router-dom';
 import { mainListItems, secondaryListItems } from './dashboard/ListItems';
 import Chart from './dashboard/Chart';
 import Deposits from './dashboard/Deposits';
-import Orders from './dashboard/Orders';
+import Pods from './dashboard/Pods';
 import Copyright from './../common/Copyright'
 import AccountMenu from './../common/AccountMenu'
 import AuthService from './../api/AuthService'
+import StateService from './../api/StateService'
+import Notification from './../common/Notification'
 
 const drawerWidth = 240;
 
@@ -112,6 +114,11 @@ export default function Dashboard(props) {
 
   const [open, setOpen] = React.useState(true);
   
+  const [success, setSuccess] = React.useState(null);
+  const [error, setError] = React.useState(null);
+  
+  const [k8sState, setK8SState] = React.useState('--');
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -133,6 +140,16 @@ export default function Dashboard(props) {
     return <Redirect to='/signin' />
   }
 
+  StateService.global().then(res => {
+    if(res.status === 200){
+      setK8SState(res.data.isRunning ? 'OK' : 'KO');
+    }else {
+      setError(res.data.message);
+    }
+  }).catch(error => {
+    setError(error.response.data.message);
+  });
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -151,7 +168,7 @@ export default function Dashboard(props) {
             Dashboard
           </Typography>
           <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
+            <Badge badgeContent={k8sState} color="secondary">
               <NotificationsIcon />
             </Badge>
           </IconButton>
@@ -194,13 +211,15 @@ export default function Dashboard(props) {
             {/* Recent Orders */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Orders />
+                <Pods />
               </Paper>
             </Grid>
           </Grid>
           <Box pt={4}>
             <Copyright />
           </Box>
+          <Notification message={success} setMessage={setSuccess} type="success" />
+          <Notification message={error} setMessage={setError} type="error" />
         </Container>
       </main>
     </div>

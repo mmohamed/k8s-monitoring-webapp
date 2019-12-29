@@ -8,7 +8,6 @@ class App extends Component {
   render() {
     return (
     <Router>
-        {/* <Link to={'/about'} className="nav-link">About</Link> */}
           <Switch>
               <Route exact path='/' component={Dashboard} />
               <Route path='/signin' component={SignIn} />
