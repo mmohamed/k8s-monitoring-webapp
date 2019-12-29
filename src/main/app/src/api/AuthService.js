@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const USER_API_BASE_URL = 'http://localhost:8080/token/';
+const USER_API_BASE_URL = 'http://localhost/k8s/token/';
 
 class AuthService {
 
@@ -17,8 +17,9 @@ class AuthService {
     }
 
     logOut() {
+        let header = this.getAuthHeader();
         localStorage.removeItem('userInfo');
-        return axios.post(USER_API_BASE_URL + 'logout', {}, this.getAuthHeader());
+        return axios.post(USER_API_BASE_URL + 'logout', {}, header);
     }
 }
 

@@ -13,6 +13,8 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Copyright from './../common/Copyright'
+import Loader from './../common/Loader'
+import Notification from './../common/Notification'
 import AuthService from '../api/AuthService'
 
 const useStyles = makeStyles(theme => ({
@@ -35,34 +37,51 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function SignIn() {
+export default function SignIn(props) {
   
   const classes = useStyles();
 
   const [state , setState] = React.useState({
-    username: '',
-    password: '',
-    rememberme: false
+    username: 'medinvention',
+    password: 'yesyes',
+    rememberme: false,
   });
 
+  const [loading, setLoading] = React.useState(false);
+
+  const [success, setSuccess] = React.useState(null);
+  const [error, setError] = React.useState(null);
+  
+  const upState = (key, value) => {
+    setState(prevState => {
+      let newState = Object.assign({}, prevState);  
+      newState[key] = value;                                     
+      return newState;                                
+    });
+  }
+
   const handleChange = event => {
-    const newState = Object.assign({}, state);
-    newState[event.target.name] = event.target.value;
-    setState(newState);
+    upState(event.target.name, event.target.value);
   }
 
   const handleSubmit = event => {
     event.preventDefault();
     
+    setLoading(true);
+
     const credentials = {username: state.username, password: state.password};
 
     AuthService.login(credentials).then(res => {
-        if(res.data.status === 200){
-            localStorage.setItem('userInfo', JSON.stringify(res.data.result));
-            this.props.history.push('/');
+        if(res.status === 200){
+            localStorage.setItem('userInfo', JSON.stringify(res.data));
+            props.history.push('/');
         }else {
-            setState({message: res.data.message});
+           setError(res.response.data.message);
         }
+    }).catch(error => {
+      setError(error.response.data.message);
+    }).finally(() => {
+      setLoading(false);
     });
   }
 
@@ -81,6 +100,7 @@ export default function SignIn() {
           Sign in
         </Typography>
         <form className={classes.form} noValidate onSubmit={handleSubmit}>
+          <Typography variant="h4" style={classes.notification}>{state.message}</Typography>
           <TextField
             variant="outlined"
             margin="normal"
@@ -142,6 +162,9 @@ export default function SignIn() {
       <Box mt={8}>
         <Copyright />
       </Box>
+      <Loader open={loading} setOpen={setLoading} />
+      <Notification message={success} setMessage={setSuccess} type="success" />
+      <Notification message={error} setMessage={setError} type="error" />
     </Container>
   )
 }

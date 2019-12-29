@@ -23,6 +23,7 @@ import Chart from './dashboard/Chart';
 import Deposits from './dashboard/Deposits';
 import Orders from './dashboard/Orders';
 import Copyright from './../common/Copyright'
+import AccountMenu from './../common/AccountMenu'
 import AuthService from './../api/AuthService'
 
 const drawerWidth = 240;
@@ -106,20 +107,29 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Dashboard() {
-
+export default function Dashboard(props) {
   const classes = useStyles();
+
   const [open, setOpen] = React.useState(true);
+  
   const handleDrawerOpen = () => {
     setOpen(true);
   };
+  
   const handleDrawerClose = () => {
     setOpen(false);
   };
+  
+  const handleLogout = () => {
+	  AuthService.logOut();
+	  props.history.push('/signin');
+  };
+
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  if(!AuthService.getUserInfo()){
-    console.log('Not logged user, redirect to sigin compoment');
+  const userInfo = AuthService.getUserInfo();
+
+  if(!userInfo){
     return <Redirect to='/signin' />
   }
 
@@ -145,6 +155,7 @@ export default function Dashboard() {
               <NotificationsIcon />
             </Badge>
           </IconButton>
+          <AccountMenu username={userInfo.username} onLogout={handleLogout} />
         </Toolbar>
       </AppBar>
       <Drawer
