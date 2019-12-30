@@ -132,6 +132,18 @@ export default function Dashboard(props) {
 	  props.history.push('/signin');
   };
 
+  React.useEffect(() => {
+    StateService.global().then(res => {
+      if(res.status === 200){
+        setK8SState(res.data.isRunning ? 'OK' : 'KO');
+      }else {
+        setError(res.data.message);
+      }
+    }).catch(error => {
+      setError(error.response.data.message);
+    });
+  }, true);
+
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const userInfo = AuthService.getUserInfo();
@@ -139,16 +151,6 @@ export default function Dashboard(props) {
   if(!userInfo){
     return <Redirect to='/signin' />
   }
-
-  StateService.global().then(res => {
-    if(res.status === 200){
-      setK8SState(res.data.isRunning ? 'OK' : 'KO');
-    }else {
-      setError(res.data.message);
-    }
-  }).catch(error => {
-    setError(error.response.data.message);
-  });
 
   return (
     <div className={classes.root}>
