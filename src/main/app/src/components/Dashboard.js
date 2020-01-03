@@ -133,6 +133,9 @@ export default function Dashboard(props) {
   };
 
   React.useEffect(() => {
+    if(!AuthService.getUserInfo()){
+      return;
+    } 
     StateService.global().then(res => {
       if(res.status === 200){
         setK8SState(res.data.isRunning ? 'OK' : 'KO');
@@ -140,9 +143,12 @@ export default function Dashboard(props) {
         setError(res.data.message);
       }
     }).catch(error => {
+      if(!error.response || !error.response.data){
+        return setError('Unable to contact server !');
+      }
       setError(error.response.data.message);
     });
-  }, true);
+  }, []);
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
