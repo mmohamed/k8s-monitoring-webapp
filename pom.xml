@@ -6,6 +6,7 @@
 		<groupId>dev.medinvention</groupId>
 		<artifactId>k8s-monitoring</artifactId>
 		<version>0.0.1</version>
+		<relativePath/>
 	</parent>
 	<artifactId>webapp</artifactId>
 
@@ -20,25 +21,25 @@
 					<nodeVersion>${node.version}</nodeVersion>
 					<npmVersion>${npm.version}</npmVersion>
 					<workingDirectory>${project.basedir}/src/main/app</workingDirectory>
-					<installDirectory>${project.basedir}/../../</installDirectory>
+					<installDirectory>${project.build.directory}</installDirectory>
 				</configuration>
 
 				<executions>
-<!-- 					<execution> -->
-<!-- 						<goals> -->
-<!-- 							<goal>install-node-and-npm</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
+ 					<execution> 
+ 						<goals> 
+ 							<goal>install-node-and-npm</goal> 
+ 						</goals> 
+ 					</execution> 
 
-<!-- 					<execution> -->
-<!-- 						<id>install-npm</id> -->
-<!-- 						<goals> -->
-<!-- 							<goal>npm</goal> -->
-<!-- 						</goals> -->
-<!-- 						<configuration> -->
-<!-- 							<arguments>install</arguments> -->
-<!-- 						</configuration> -->
-<!-- 					</execution> -->
+ 					<execution> 
+ 						<id>install-npm</id> 
+ 						<goals> 
+ 							<goal>npm</goal> 
+ 						</goals> 
+ 						<configuration>
+ 							<arguments>install</arguments> 
+ 						</configuration> 
+ 					</execution> 
 
 					<execution>
 						<id>build-npm</id>
