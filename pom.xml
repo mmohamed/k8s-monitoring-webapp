@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>io.ext.medinvention</groupId>
+		<groupId>dev.medinvention</groupId>
 		<artifactId>k8s-monitoring</artifactId>
 		<version>0.0.1</version>
 	</parent>
@@ -20,25 +20,25 @@
 					<nodeVersion>${node.version}</nodeVersion>
 					<npmVersion>${npm.version}</npmVersion>
 					<workingDirectory>${project.basedir}/src/main/app</workingDirectory>
-					<installDirectory>${project.build.directory}</installDirectory>
+					<installDirectory>${project.basedir}/../../</installDirectory>
 				</configuration>
 
 				<executions>
-					<execution>
-						<goals>
-							<goal>install-node-and-npm</goal>
-						</goals>
-					</execution>
+<!-- 					<execution> -->
+<!-- 						<goals> -->
+<!-- 							<goal>install-node-and-npm</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
 
-					<execution>
-						<id>install-npm</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<configuration>
-							<arguments>install</arguments>
-						</configuration>
-					</execution>
+<!-- 					<execution> -->
+<!-- 						<id>install-npm</id> -->
+<!-- 						<goals> -->
+<!-- 							<goal>npm</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							<arguments>install</arguments> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
 
 					<execution>
 						<id>build-npm</id>
