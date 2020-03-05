@@ -6,8 +6,8 @@ export default function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://medinvention.ext.io/">
-        medinvention.ext.io
+      <Link color="inherit" href="https://medinvention.dev/">
+        medinvention.dev
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
