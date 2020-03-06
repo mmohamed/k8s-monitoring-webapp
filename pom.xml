@@ -58,7 +58,7 @@
 				<executions>		
 
 					<execution>
-						<id>install-npm</id>
+						<id>install-npm-origin</id>
 						<goals>
 							<goal>npm</goal>
 						</goals>
