@@ -34,7 +34,7 @@
 									<goal>install-node-and-npm</goal>
 								</goals>
 							</execution>
-							
+
 						</executions>
 					</plugin>
 				</plugins>
