@@ -63,6 +63,16 @@
 							<goal>npm</goal>
 						</goals>
 						<configuration>
+							<arguments>install npm</arguments>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>install-npm</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
 							<arguments>install</arguments>
 						</configuration>
 					</execution>
