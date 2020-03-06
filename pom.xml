@@ -34,6 +34,16 @@
 									<goal>install-node-and-npm</goal>
 								</goals>
 							</execution>
+											
+							<execution>
+								<id>install-npm</id>
+								<goals>
+									<goal>npm</goal>
+								</goals>
+								<configuration>
+									<arguments>install</arguments>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
@@ -54,18 +64,7 @@
 					<installDirectory>${NODE_PATH}</installDirectory>
 				</configuration>
 
-				<executions>
-				
-					<execution>
-						<id>install-npm</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<configuration>
-							<arguments>install</arguments>
-						</configuration>
-					</execution>
-							
+				<executions>							
 					<execution>
 						<id>build-npm</id>
 						<goals>
@@ -76,7 +75,6 @@
 							<arguments>run-script build</arguments>
 						</configuration>
 					</execution>
-
 				</executions>
 			</plugin>
 
