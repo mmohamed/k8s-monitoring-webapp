@@ -67,6 +67,16 @@
 						</configuration>
 					</execution>
 
+					<execution>
+						<id>build-npm</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<configuration>
+							<arguments>run-script build</arguments>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
