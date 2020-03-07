@@ -74,7 +74,7 @@
 						</goals>
 						<phase>prepare-package</phase>
 						<configuration>
-							<arguments>--max-old-space-size=4096 run-script build</arguments>
+							<arguments>run-script build</arguments>
 						</configuration>
 					</execution>
 				</executions>
