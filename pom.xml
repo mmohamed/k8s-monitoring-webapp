@@ -56,7 +56,7 @@
 				</configuration>
 
 				<executions>		
-					
+
 					<execution>
 						<id>install-npm</id>
 						<goals>
@@ -74,7 +74,7 @@
 						</goals>
 						<phase>prepare-package</phase>
 						<configuration>
-							<arguments>run-script build</arguments>
+							<arguments>--max-old-space-size=4096 run-script build</arguments>
 						</configuration>
 					</execution>
 				</executions>
