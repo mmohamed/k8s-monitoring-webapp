@@ -42,8 +42,8 @@ export default function SignIn(props) {
   const classes = useStyles();
 
   const [state , setState] = React.useState({
-    username: 'medinvention',
-    password: 'yesyes',
+    username: '',
+    password: '',
     rememberme: false,
   });
 
