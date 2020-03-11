@@ -8,6 +8,14 @@ class StateService{
 	global(){
 		return axios.get(USER_API_BASE_URL + 'global', AuthService.getAuthHeader());
 	}
+	
+	pods(){
+		return axios.get(USER_API_BASE_URL + 'pods', AuthService.getAuthHeader());
+	}
+	
+	nodes(){
+		return axios.get(USER_API_BASE_URL + 'nodes', AuthService.getAuthHeader());
+	}
 }
 
 export default new StateService();

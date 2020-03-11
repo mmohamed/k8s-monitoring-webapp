@@ -131,7 +131,11 @@ export default function Dashboard(props) {
 	  AuthService.logOut();
 	  props.history.push('/signin');
   };
-
+	
+  const handleError = (message) => {
+	setError(message);
+  }
+ 	
   React.useEffect(() => {
     if(!AuthService.getUserInfo()){
       return;
@@ -216,10 +220,10 @@ export default function Dashboard(props) {
                 <Deposits />
               </Paper>
             </Grid>
-            {/* Recent Orders */}
+            {/* Pods */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Pods />
+                <Pods onError={handleError} />
               </Paper>
             </Grid>
           </Grid>
