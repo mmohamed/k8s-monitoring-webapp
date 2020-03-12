@@ -19,8 +19,8 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { Redirect } from 'react-router-dom';
 import { mainListItems, secondaryListItems } from './dashboard/ListItems';
-import Chart from './dashboard/Chart';
-import Deposits from './dashboard/Deposits';
+import Nodes from './dashboard/Nodes';
+import State from './dashboard/State';
 import Pods from './dashboard/Pods';
 import Copyright from './../common/Copyright'
 import AccountMenu from './../common/AccountMenu'
@@ -105,20 +105,26 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
   },
   fixedHeight: {
-    height: 240,
+    height: 260,
   },
 }));
 
 export default function Dashboard(props) {
   const classes = useStyles();
-
-  const [open, setOpen] = React.useState(true);
+  
+  let nodesLimit = {};
+  let timelineDataHistory = [];
+  
+  const [open, setOpen] = React.useState(false);
   
   const [success, setSuccess] = React.useState(null);
   const [error, setError] = React.useState(null);
   
   const [k8sState, setK8SState] = React.useState('--');
 
+  const [nodesColor, setNodesColor] = React.useState([]);
+  const [timelineData, setTimelineData] = React.useState([]);
+	
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -135,6 +141,50 @@ export default function Dashboard(props) {
   const handleError = (message) => {
 	setError(message);
   }
+
+  const handleNodeData = (nodes) => {
+	let newNodesLimit = [];
+	let newNodeColor = [];
+	let colors = ["#8884d8", "#82ca9d", "#28a745", "#007bff", "#dc3545", "#ffc107", "#343a40"];
+	nodes.map((node, key) => {
+		newNodesLimit[node.name] = node.pods;
+		newNodeColor.push({name: node.name, color: colors[~~(key % colors.length)]});
+	});
+	nodesLimit = newNodesLimit;
+	setNodesColor(newNodeColor);
+  }
+
+  const handlePodData = (pods) => {
+	let newDatas = {};
+	pods.map((pod) => {
+		if(!newDatas[pod.node]){
+			newDatas[pod.node] = 0;
+		}
+		newDatas[pod.node]++;
+	});
+	let now = Math.round((new Date()).getTime()/1000);
+	let upData = {timing: now};
+	Object.keys(newDatas).map((node) => {
+		let count = newDatas[node];
+		if(node in nodesLimit){
+			upData[node] = Math.round((count/nodesLimit[node])*100);
+		}
+	})
+	let newTimelineData = timelineDataHistory.slice();
+	newTimelineData.push(upData);
+	if(newTimelineData.length > 10){
+		newTimelineData = newTimelineData.slice(-10);
+	}
+	newTimelineData.map((value) => {
+		if(value.timing === now){
+			value.time = 'Now'
+		}else{
+			value.time = -(value.timing - now);
+		}
+	});
+	setTimelineData(newTimelineData);
+	timelineDataHistory = newTimelineData.slice();
+  }
  	
   React.useEffect(() => {
     if(!AuthService.getUserInfo()){
@@ -150,6 +200,9 @@ export default function Dashboard(props) {
       if(!error.response || !error.response.data){
         return setError('Unable to contact server !');
       }
+	  if(error.response.status === 401){
+		return props.history.push('/signin');
+	  }
       setError(error.response.data.message);
     });
   }, []);
@@ -177,7 +230,7 @@ export default function Dashboard(props) {
             <MenuIcon />
           </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-            Dashboard
+            Monitoring
           </Typography>
           <IconButton color="inherit">
             <Badge badgeContent={k8sState} color="secondary">
@@ -202,28 +255,28 @@ export default function Dashboard(props) {
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
-        <List>{secondaryListItems}</List>
+        {/*<List>{secondaryListItems}</List>*/}
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
-            {/* Chart */}
+            {/* Nodes */}
             <Grid item xs={12} md={8} lg={9}>
               <Paper className={fixedHeightPaper}>
-                <Chart />
+                <Nodes data={timelineData} nodes={nodesColor} />
               </Paper>
             </Grid>
-            {/* Recent Deposits */}
+            {/* State */}
             <Grid item xs={12} md={4} lg={3}>
               <Paper className={fixedHeightPaper}>
-                <Deposits />
+                <State onError={handleError} onData={handleNodeData}/>
               </Paper>
             </Grid>
             {/* Pods */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Pods onError={handleError} />
+                <Pods onError={handleError} onData={handlePodData} />
               </Paper>
             </Grid>
           </Grid>
