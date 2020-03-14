@@ -1,25 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '@material-ui/core/styles';
-import { LineChart , Line, XAxis, YAxis, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart , Line, XAxis, YAxis, Legend, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Title from './Title';
 
-Nodes.propTypes = {
+RessourceTimeline.propTypes = {
   data: PropTypes.array,
-  nodes: PropTypes.array
+  nodes: PropTypes.array,
+  title: PropTypes.string
 };
 
-Nodes.defaultProps = {
-  nodes: [{name: 'master', 'color': 'black'}],
-  data: [{time: '00.01', 'master' : 1}]
+RessourceTimeline.defaultProps = {
+  nodes: [],
+  data: [],
+  title: ''
 };
 
-export default function Nodes(props) {
+export default function RessourceTimeline(props) {
   const theme = useTheme();
 
   return (
     <React.Fragment>
-      <Title>Nodes pods usages (%)</Title>
+      <Title>{props.title}</Title>
       <ResponsiveContainer>
         <LineChart
           data={props.data}
@@ -30,8 +32,9 @@ export default function Nodes(props) {
             left: 16,
           }}
         >
+		  <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" stroke={theme.palette.text.secondary} />
-          <YAxis stroke={theme.palette.text.secondary} />
+          <YAxis orientation={'right'} domain={[0, 'auto']} stroke={theme.palette.text.secondary} />
 		  <Legend />
 		  <Tooltip />
 		  {props.nodes.map(node => {

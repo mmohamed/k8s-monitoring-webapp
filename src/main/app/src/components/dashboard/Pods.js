@@ -40,6 +40,7 @@ export default function Pods(props) {
 			let serializedArray = [];
 			array.map((element) => {
 				serializedArray.push(JSON.stringify(element));
+				return element;
 			});
 			return serializedArray.indexOf(JSON.stringify(search)) > -1;
 		}
@@ -47,11 +48,13 @@ export default function Pods(props) {
 			if(!inArray(podHistory,newPod)){
 				changed.push(key);
 			}	
+			return newPod;
 		});
 		podHistory = res.data.slice();
 		if(changed.length !== newPods.length){
 			changed.map((index) => {
 				newPods[index].changed = true;
+				return index;
 			});	
 		}
         setPodsState(newPods);
@@ -80,7 +83,7 @@ export default function Pods(props) {
       return;
     } 
 	get();
-  }, []);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <React.Fragment>

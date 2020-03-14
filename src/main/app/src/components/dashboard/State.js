@@ -31,14 +31,14 @@ export default function State(props) {
       }else {
         props.onError(res.data.message);
       }
-	  setTimeout(get, 15000);
+	  setTimeout(get, 5000);
     }).catch(error => {
       if(!error.response || !error.response.data){
-	    setTimeout(get, 60000);
-        return props.onError('[State] Unable to contact server, auto-retry after 60s !');
+	    setTimeout(get, 10000);
+        return props.onError('[State] Unable to contact server, auto-retry after 10s !');
       }
       props.onError(error.response.data.message);
-	  setTimeout(get, 15000);
+	  setTimeout(get, 5000);
     });	
   }
 
@@ -47,7 +47,7 @@ export default function State(props) {
       return;
     } 
 	get();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <React.Fragment>

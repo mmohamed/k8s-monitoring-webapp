@@ -18,8 +18,8 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { Redirect } from 'react-router-dom';
-import { mainListItems, secondaryListItems } from './dashboard/ListItems';
-import Nodes from './dashboard/Nodes';
+import { mainListItems } from './dashboard/ListItems';
+import RessourceTimeline from './dashboard/RessourceTimeline';
 import State from './dashboard/State';
 import Pods from './dashboard/Pods';
 import Copyright from './../common/Copyright'
@@ -114,7 +114,9 @@ export default function Dashboard(props) {
   
   let nodesLimit = {};
   let timelineDataHistory = [];
-  
+  let timelineMemoryDataHistory = [];
+  let timelineCpuDataHistory = [];
+
   const [open, setOpen] = React.useState(false);
   
   const [success, setSuccess] = React.useState(null);
@@ -123,7 +125,9 @@ export default function Dashboard(props) {
   const [k8sState, setK8SState] = React.useState('--');
 
   const [nodesColor, setNodesColor] = React.useState([]);
-  const [timelineData, setTimelineData] = React.useState([]);
+  const [timelinePodsData, setTimelinePodsData] = React.useState([]);
+  const [timelineCpuData, setTimelineCpuData] = React.useState([]);
+  const [timelineMemoryData, setTimelineMemoryData] = React.useState([]);
 	
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -149,9 +153,57 @@ export default function Dashboard(props) {
 	nodes.map((node, key) => {
 		newNodesLimit[node.name] = node.pods;
 		newNodeColor.push({name: node.name, color: colors[~~(key % colors.length)]});
+		return node;
 	});
 	nodesLimit = newNodesLimit;
 	setNodesColor(newNodeColor);
+	/**** Memory and CPU timeline data ****/
+	let now = Math.round((new Date()).getTime()/1000);
+	let upMemoryData = {timing: now};
+	let upCpuData = {timing: now};
+	
+	nodes.map((node) => {
+		upMemoryData[node.name] = Math.round((node.metrics.memory/node.memory)*100);
+		upCpuData[node.name] = Math.round((node.metrics.cpu/node.cpu)*100);
+		return node;
+	});
+	
+	let newTimelineMemoryData = timelineMemoryDataHistory.slice();
+	newTimelineMemoryData.push(upMemoryData);
+	
+	let newTimelineCpuData = timelineCpuDataHistory.slice();
+	newTimelineCpuData.push(upCpuData);
+	
+	if(newTimelineMemoryData.length > 10){
+		newTimelineMemoryData = newTimelineMemoryData.slice(-10);
+	}
+	
+	if(newTimelineCpuData.length > 10){
+		newTimelineCpuData = newTimelineCpuData.slice(-10);
+	}
+	
+	newTimelineMemoryData.map((value) => {
+		if(value.timing === now){
+			value.time = 'Now'
+		}else{
+			value.time = -(value.timing - now);
+		}
+		return value;
+	});
+	newTimelineCpuData.map((value) => {
+		if(value.timing === now){
+			value.time = 'Now'
+		}else{
+			value.time = -(value.timing - now);
+		}
+		return value;
+	});
+	
+	setTimelineMemoryData(newTimelineMemoryData);
+	timelineMemoryDataHistory = newTimelineMemoryData.slice();
+	
+	setTimelineCpuData(newTimelineCpuData);
+	timelineCpuDataHistory = newTimelineCpuData.slice();
   }
 
   const handlePodData = (pods) => {
@@ -161,6 +213,7 @@ export default function Dashboard(props) {
 			newDatas[pod.node] = 0;
 		}
 		newDatas[pod.node]++;
+		return pod;
 	});
 	let now = Math.round((new Date()).getTime()/1000);
 	let upData = {timing: now};
@@ -169,11 +222,12 @@ export default function Dashboard(props) {
 		if(node in nodesLimit){
 			upData[node] = Math.round((count/nodesLimit[node])*100);
 		}
+		return node;
 	})
 	let newTimelineData = timelineDataHistory.slice();
 	newTimelineData.push(upData);
-	if(newTimelineData.length > 10){
-		newTimelineData = newTimelineData.slice(-10);
+	if(newTimelineData.length > 20){
+		newTimelineData = newTimelineData.slice(-20);
 	}
 	newTimelineData.map((value) => {
 		if(value.timing === now){
@@ -181,8 +235,9 @@ export default function Dashboard(props) {
 		}else{
 			value.time = -(value.timing - now);
 		}
+		return value;
 	});
-	setTimelineData(newTimelineData);
+	setTimelinePodsData(newTimelineData);
 	timelineDataHistory = newTimelineData.slice();
   }
  	
@@ -205,7 +260,7 @@ export default function Dashboard(props) {
 	  }
       setError(error.response.data.message);
     });
-  }, []);
+  }, [props]);
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -261,10 +316,20 @@ export default function Dashboard(props) {
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
-            {/* Nodes */}
-            <Grid item xs={12} md={8} lg={9}>
+            {/* Timelines */}
+            <Grid item xs={6}>
               <Paper className={fixedHeightPaper}>
-                <Nodes data={timelineData} nodes={nodesColor} />
+                <RessourceTimeline data={timelineCpuData} nodes={nodesColor} title={"CPU usages (%)"}/>
+              </Paper>
+            </Grid>
+			<Grid item xs={6}>
+              <Paper className={fixedHeightPaper}>
+                <RessourceTimeline data={timelineMemoryData} nodes={nodesColor} title={"Memory usages (%)"} />
+              </Paper>
+            </Grid>
+			<Grid item xs={12} md={8} lg={9}>
+              <Paper className={fixedHeightPaper}>
+                <RessourceTimeline data={timelinePodsData} nodes={nodesColor} title={"Pods usages (%)"}/>
               </Paper>
             </Grid>
             {/* State */}
