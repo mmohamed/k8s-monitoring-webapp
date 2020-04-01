@@ -16,6 +16,7 @@ RessourceTimeline.defaultProps = {
   title: ''
 };
 
+
 export default function RessourceTimeline(props) {
   const theme = useTheme();
 
@@ -36,7 +37,7 @@ export default function RessourceTimeline(props) {
           <XAxis dataKey="time" stroke={theme.palette.text.secondary} />
           <YAxis orientation={'right'} domain={[0, 'auto']} stroke={theme.palette.text.secondary} />
 		  <Legend />
-		  <Tooltip />
+		  <Tooltip isAnimationActive={false} labelFormatter={function(label) {return null }} />
 		  {props.nodes.map(node => {
 		  	return (<Line type="monotone" key={node.name} dataKey={node.name} stroke={node.color} dot={false} />)
 		  })}

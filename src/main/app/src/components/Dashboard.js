@@ -105,17 +105,16 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
   },
   fixedHeight: {
-    height: 260,
+    height: 300,
   },
 }));
 
 export default function Dashboard(props) {
   const classes = useStyles();
   
-  let nodesLimit = {};
-  let timelineDataHistory = [];
   let timelineMemoryDataHistory = [];
   let timelineCpuDataHistory = [];
+  let timelineCpuTemperatureDataHistory = [];
 
   const [open, setOpen] = React.useState(false);
   
@@ -125,9 +124,9 @@ export default function Dashboard(props) {
   const [k8sState, setK8SState] = React.useState('--');
 
   const [nodesColor, setNodesColor] = React.useState([]);
-  const [timelinePodsData, setTimelinePodsData] = React.useState([]);
   const [timelineCpuData, setTimelineCpuData] = React.useState([]);
   const [timelineMemoryData, setTimelineMemoryData] = React.useState([]);
+  const [timelineCpuTemperatureData, setTimelineCpuTemperatureData] = React.useState([]);
 	
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -147,24 +146,23 @@ export default function Dashboard(props) {
   }
 
   const handleNodeData = (nodes) => {
-	let newNodesLimit = [];
 	let newNodeColor = [];
 	let colors = ["#8884d8", "#82ca9d", "#28a745", "#007bff", "#dc3545", "#ffc107", "#343a40"];
 	nodes.map((node, key) => {
-		newNodesLimit[node.name] = node.pods;
 		newNodeColor.push({name: node.name, color: colors[~~(key % colors.length)]});
 		return node;
 	});
-	nodesLimit = newNodesLimit;
 	setNodesColor(newNodeColor);
 	/**** Memory and CPU timeline data ****/
 	let now = Math.round((new Date()).getTime()/1000);
 	let upMemoryData = {timing: now};
 	let upCpuData = {timing: now};
+	let upTempData = {timing: now};
 	
 	nodes.map((node) => {
 		upMemoryData[node.name] = Math.round((node.metrics.memory/node.memory)*100);
 		upCpuData[node.name] = Math.round((node.metrics.cpu/node.cpu)*100);
+		upTempData[node.name] = Math.round(node.cpuTemperature*100)/100;
 		return node;
 	});
 	
@@ -174,12 +172,19 @@ export default function Dashboard(props) {
 	let newTimelineCpuData = timelineCpuDataHistory.slice();
 	newTimelineCpuData.push(upCpuData);
 	
+	let newTimelineCpuTemperatureData = timelineCpuTemperatureDataHistory.slice();
+	newTimelineCpuTemperatureData.push(upTempData);
+	
 	if(newTimelineMemoryData.length > 10){
 		newTimelineMemoryData = newTimelineMemoryData.slice(-10);
 	}
 	
 	if(newTimelineCpuData.length > 10){
 		newTimelineCpuData = newTimelineCpuData.slice(-10);
+	}
+	
+	if(newTimelineCpuTemperatureData.length > 20){
+		newTimelineCpuTemperatureData = newTimelineCpuTemperatureData.slice(-20);
 	}
 	
 	newTimelineMemoryData.map((value) => {
@@ -198,38 +203,7 @@ export default function Dashboard(props) {
 		}
 		return value;
 	});
-	
-	setTimelineMemoryData(newTimelineMemoryData);
-	timelineMemoryDataHistory = newTimelineMemoryData.slice();
-	
-	setTimelineCpuData(newTimelineCpuData);
-	timelineCpuDataHistory = newTimelineCpuData.slice();
-  }
-
-  const handlePodData = (pods) => {
-	let newDatas = {};
-	pods.map((pod) => {
-		if(!newDatas[pod.node]){
-			newDatas[pod.node] = 0;
-		}
-		newDatas[pod.node]++;
-		return pod;
-	});
-	let now = Math.round((new Date()).getTime()/1000);
-	let upData = {timing: now};
-	Object.keys(newDatas).map((node) => {
-		let count = newDatas[node];
-		if(node in nodesLimit){
-			upData[node] = Math.round((count/nodesLimit[node])*100);
-		}
-		return node;
-	})
-	let newTimelineData = timelineDataHistory.slice();
-	newTimelineData.push(upData);
-	if(newTimelineData.length > 20){
-		newTimelineData = newTimelineData.slice(-20);
-	}
-	newTimelineData.map((value) => {
+	newTimelineCpuTemperatureData.map((value) => {
 		if(value.timing === now){
 			value.time = 'Now'
 		}else{
@@ -237,8 +211,15 @@ export default function Dashboard(props) {
 		}
 		return value;
 	});
-	setTimelinePodsData(newTimelineData);
-	timelineDataHistory = newTimelineData.slice();
+	
+	setTimelineMemoryData(newTimelineMemoryData);
+	timelineMemoryDataHistory = newTimelineMemoryData.slice();
+	
+	setTimelineCpuData(newTimelineCpuData);
+	timelineCpuDataHistory = newTimelineCpuData.slice();
+	
+	setTimelineCpuTemperatureData(newTimelineCpuTemperatureData);
+	timelineCpuTemperatureDataHistory = newTimelineCpuTemperatureData.slice();
   }
  	
   React.useEffect(() => {
@@ -329,7 +310,7 @@ export default function Dashboard(props) {
             </Grid>
 			<Grid item xs={12} md={8} lg={9}>
               <Paper className={fixedHeightPaper}>
-                <RessourceTimeline data={timelinePodsData} nodes={nodesColor} title={"Pods usages (%)"}/>
+                <RessourceTimeline data={timelineCpuTemperatureData} nodes={nodesColor} title={"CPU Temperature (C°)"}/>
               </Paper>
             </Grid>
             {/* State */}
@@ -341,7 +322,7 @@ export default function Dashboard(props) {
             {/* Pods */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Pods onError={handleError} onData={handlePodData} />
+                <Pods onError={handleError}/>
               </Paper>
             </Grid>
           </Grid>

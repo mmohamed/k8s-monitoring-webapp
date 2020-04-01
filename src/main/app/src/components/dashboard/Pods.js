@@ -58,7 +58,9 @@ export default function Pods(props) {
 			});	
 		}
         setPodsState(newPods);
-		props.onData(res.data);
+		if(props.onData){
+			props.onData(res.data);	
+		}
       }else {
         props.onError(res.data.message);
       }
