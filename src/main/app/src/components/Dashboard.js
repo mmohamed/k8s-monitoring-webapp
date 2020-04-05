@@ -20,6 +20,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import { Redirect } from 'react-router-dom';
 import { mainListItems } from './dashboard/ListItems';
 import RessourceTimeline from './dashboard/RessourceTimeline';
+import FanState from './dashboard/FanState';
 import State from './dashboard/State';
 import Pods from './dashboard/Pods';
 import Copyright from './../common/Copyright'
@@ -106,6 +107,7 @@ const useStyles = makeStyles(theme => ({
   },
   fixedHeight: {
     height: 300,
+	position: 'relative'
   },
 }));
 
@@ -310,6 +312,7 @@ export default function Dashboard(props) {
             </Grid>
 			<Grid item xs={12} md={8} lg={9}>
               <Paper className={fixedHeightPaper}>
+				<FanState onError={handleError}/>
                 <RessourceTimeline data={timelineCpuTemperatureData} nodes={nodesColor} title={"CPU Temperature (C°)"}/>
               </Paper>
             </Grid>

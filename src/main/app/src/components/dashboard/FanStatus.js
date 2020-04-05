@@ -4,7 +4,7 @@ import { useTheme } from '@material-ui/core/styles';
 import { LineChart , Line, XAxis, YAxis, Legend, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Title from './Title';
 
-RessourceTimeline.propTypes = {
+FanStatus.propTypes = {
   data: PropTypes.array,
   nodes: PropTypes.array,
   title: PropTypes.string
