@@ -92,7 +92,7 @@ export default function FanState(props) {
 			  checked={fanState.isRunning}
 			  disabled={!fanState.isEnabled}
 			/>
-			<label className={classes.smalllabel}>Start/Stop Temp C° : {fanState.minTemperature} / {fanState.maxTemperature}</label>
+			<label className={classes.smalllabel}>Start/Stop Temp C° : {fanState.maxTemperature} / {fanState.minTemperature}</label>
 		</div>
     </React.Fragment>
   );
