@@ -18,9 +18,10 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { Redirect } from 'react-router-dom';
-import { mainListItems, secondaryListItems } from './dashboard/ListItems';
-import Chart from './dashboard/Chart';
-import Deposits from './dashboard/Deposits';
+import { mainListItems } from './dashboard/ListItems';
+import RessourceTimeline from './dashboard/RessourceTimeline';
+import FanState from './dashboard/FanState';
+import State from './dashboard/State';
 import Pods from './dashboard/Pods';
 import Copyright from './../common/Copyright'
 import AccountMenu from './../common/AccountMenu'
@@ -105,20 +106,30 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
   },
   fixedHeight: {
-    height: 240,
+    height: 300,
+	position: 'relative'
   },
 }));
 
 export default function Dashboard(props) {
   const classes = useStyles();
+  
+  let timelineMemoryDataHistory = [];
+  let timelineCpuDataHistory = [];
+  let timelineCpuTemperatureDataHistory = [];
 
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   
   const [success, setSuccess] = React.useState(null);
   const [error, setError] = React.useState(null);
   
   const [k8sState, setK8SState] = React.useState('--');
 
+  const [nodesColor, setNodesColor] = React.useState([]);
+  const [timelineCpuData, setTimelineCpuData] = React.useState([]);
+  const [timelineMemoryData, setTimelineMemoryData] = React.useState([]);
+  const [timelineCpuTemperatureData, setTimelineCpuTemperatureData] = React.useState([]);
+	
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -131,7 +142,88 @@ export default function Dashboard(props) {
 	  AuthService.logOut();
 	  props.history.push('/signin');
   };
+	
+  const handleError = (message) => {
+	setError(message);
+  }
 
+  const handleNodeData = (nodes) => {
+	let newNodeColor = [];
+	let colors = ["#8884d8", "#82ca9d", "#28a745", "#007bff", "#dc3545", "#ffc107", "#343a40"];
+	nodes.map((node, key) => {
+		newNodeColor.push({name: node.name, color: colors[~~(key % colors.length)]});
+		return node;
+	});
+	setNodesColor(newNodeColor);
+	/**** Memory and CPU timeline data ****/
+	let now = Math.round((new Date()).getTime()/1000);
+	let upMemoryData = {timing: now};
+	let upCpuData = {timing: now};
+	let upTempData = {timing: now};
+	
+	nodes.map((node) => {
+		upMemoryData[node.name] = Math.round((node.metrics.memory/node.memory)*100);
+		upCpuData[node.name] = Math.round((node.metrics.cpu/node.cpu)*100);
+		upTempData[node.name] = Math.round(node.cpuTemperature*100)/100;
+		return node;
+	});
+	
+	let newTimelineMemoryData = timelineMemoryDataHistory.slice();
+	newTimelineMemoryData.push(upMemoryData);
+	
+	let newTimelineCpuData = timelineCpuDataHistory.slice();
+	newTimelineCpuData.push(upCpuData);
+	
+	let newTimelineCpuTemperatureData = timelineCpuTemperatureDataHistory.slice();
+	newTimelineCpuTemperatureData.push(upTempData);
+	
+	if(newTimelineMemoryData.length > 10){
+		newTimelineMemoryData = newTimelineMemoryData.slice(-10);
+	}
+	
+	if(newTimelineCpuData.length > 10){
+		newTimelineCpuData = newTimelineCpuData.slice(-10);
+	}
+	
+	if(newTimelineCpuTemperatureData.length > 20){
+		newTimelineCpuTemperatureData = newTimelineCpuTemperatureData.slice(-20);
+	}
+	
+	newTimelineMemoryData.map((value) => {
+		if(value.timing === now){
+			value.time = 'Now'
+		}else{
+			value.time = -(value.timing - now);
+		}
+		return value;
+	});
+	newTimelineCpuData.map((value) => {
+		if(value.timing === now){
+			value.time = 'Now'
+		}else{
+			value.time = -(value.timing - now);
+		}
+		return value;
+	});
+	newTimelineCpuTemperatureData.map((value) => {
+		if(value.timing === now){
+			value.time = 'Now'
+		}else{
+			value.time = -(value.timing - now);
+		}
+		return value;
+	});
+	
+	setTimelineMemoryData(newTimelineMemoryData);
+	timelineMemoryDataHistory = newTimelineMemoryData.slice();
+	
+	setTimelineCpuData(newTimelineCpuData);
+	timelineCpuDataHistory = newTimelineCpuData.slice();
+	
+	setTimelineCpuTemperatureData(newTimelineCpuTemperatureData);
+	timelineCpuTemperatureDataHistory = newTimelineCpuTemperatureData.slice();
+  }
+ 	
   React.useEffect(() => {
     if(!AuthService.getUserInfo()){
       return;
@@ -146,9 +238,12 @@ export default function Dashboard(props) {
       if(!error.response || !error.response.data){
         return setError('Unable to contact server !');
       }
+	  if(error.response.status === 401){
+		return props.history.push('/signin');
+	  }
       setError(error.response.data.message);
     });
-  }, []);
+  }, [props]);
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
@@ -173,7 +268,7 @@ export default function Dashboard(props) {
             <MenuIcon />
           </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-            Dashboard
+            Monitoring
           </Typography>
           <IconButton color="inherit">
             <Badge badgeContent={k8sState} color="secondary">
@@ -198,28 +293,39 @@ export default function Dashboard(props) {
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
-        <List>{secondaryListItems}</List>
+        {/*<List>{secondaryListItems}</List>*/}
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
-            {/* Chart */}
-            <Grid item xs={12} md={8} lg={9}>
+            {/* Timelines */}
+            <Grid item xs={6}>
               <Paper className={fixedHeightPaper}>
-                <Chart />
+                <RessourceTimeline data={timelineCpuData} nodes={nodesColor} title={"CPU usages (%)"}/>
               </Paper>
             </Grid>
-            {/* Recent Deposits */}
+			<Grid item xs={6}>
+              <Paper className={fixedHeightPaper}>
+                <RessourceTimeline data={timelineMemoryData} nodes={nodesColor} title={"Memory usages (%)"} />
+              </Paper>
+            </Grid>
+			<Grid item xs={12} md={8} lg={9}>
+              <Paper className={fixedHeightPaper}>
+				<FanState onError={handleError}/>
+                <RessourceTimeline data={timelineCpuTemperatureData} nodes={nodesColor} title={"CPU Temperature (C°)"}/>
+              </Paper>
+            </Grid>
+            {/* State */}
             <Grid item xs={12} md={4} lg={3}>
               <Paper className={fixedHeightPaper}>
-                <Deposits />
+                <State onError={handleError} onData={handleNodeData}/>
               </Paper>
             </Grid>
-            {/* Recent Orders */}
+            {/* Pods */}
             <Grid item xs={12}>
               <Paper className={classes.paper}>
-                <Pods />
+                <Pods onError={handleError}/>
               </Paper>
             </Grid>
           </Grid>
