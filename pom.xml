@@ -86,7 +86,7 @@
 		<profile>
 			<id>skip-node</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<plugins>
@@ -152,5 +152,78 @@
 				</plugins>
 			</build>
 		</profile>
+		
+		<profile>
+			<id>global</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>${maven.exec.plugin.version}</version>
+
+						<executions>
+
+							<execution>
+								<id>install-npm-from-global</id>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>npm</executable>
+									<workingDirectory>${project.basedir}/src/main/app</workingDirectory>
+									<arguments>
+						                <argument>install</argument>
+						             </arguments>
+								</configuration>
+							</execution>
+
+							<execution>
+								<id>build-npm-from-global</id>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<phase>prepare-package</phase>
+								<configuration>
+									<executable>npm</executable>
+									<workingDirectory>${project.basedir}/src/main/app</workingDirectory>
+									<arguments>
+										<argument>run-script</argument>
+						                <argument>build</argument>
+						             </arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>${maven.resources.plugin.version}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<phase>prepare-package</phase>
+								<configuration>
+									<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/src/main/app/build</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+		</profile>
+		
 	</profiles>
 </project>
