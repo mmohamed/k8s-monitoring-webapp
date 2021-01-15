@@ -162,9 +162,15 @@ export default function Dashboard(props) {
 	let upTempData = {timing: now};
 	
 	nodes.map((node) => {
-		upMemoryData[node.name] = Math.round((node.metrics.memory/node.memory)*100);
-		upCpuData[node.name] = Math.round((node.metrics.cpu/node.cpu)*100);
-		upTempData[node.name] = Math.round(node.cpuTemperature*100)/100;
+		try{
+			upMemoryData[node.name] = Math.round((node.metrics.memory/node.memory)*100);
+			upCpuData[node.name] = Math.round((node.metrics.cpu/node.cpu)*100);
+			upTempData[node.name] = Math.round(node.cpuTemperature*100)/100;
+		}catch(error){
+			upMemoryData[node.name] = 0;
+			upCpuData[node.name] = 0;
+			upTempData[node.name] = 0;
+		}
 		return node;
 	});
 	
